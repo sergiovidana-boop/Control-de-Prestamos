@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Control de Créditos</title>
+   <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="container">
+    <h1 class="header-title">
+     <img src="favicon.png" alt="Icono" class="header-icon">
+      Control de Créditos
+      </h1>
+
+    <!-- Formulario de Registro -->
+    <div class="card">
+      <h2>Registrar Nuevo Crédito</h2>
+      <form id="credit-form">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="concept">Cliente / Concepto</label>
+            <input type="text" id="concept" placeholder="Ej. Préstamo Personal" required>
+          </div>
+          <div class="form-group">
+            <label for="amount">Monto del Crédito ($)</label>
+            <input type="number" id="amount" step="0.01" placeholder="Ej. 10000" required>
+          </div>
+          <div class="form-group">
+            <label for="opening_fee">Comisión de Apertura ($)</label>
+            <input type="number" id="opening_fee" step="0.01" placeholder="Ej. 500" value="0">
+          </div>
+          <div class="form-group">
+            <label for="months">Cantidad de Mensualidades</label>
+            <input type="number" id="months" min="1" placeholder="Ej. 12" required>
+          </div>
+          <div class="form-group">
+            <label for="monthly_payment">Pago Mensual ($)</label>
+            <input type="number" id="monthly_payment" step="0.01" placeholder="Ej. 950" required>
+          </div>
+        </div>
+        <button type="submit" class="btn">Guardar Crédito</button>
+      </form>
+    </div>
+
+    <!-- Lista y Resumen de Créditos -->
+    <div class="card">
+      <h2>Resumen de Créditos</h2>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Concepto</th>
+              <th>Monto Base</th>
+              <th>Comisión</th>
+              <th>Total Pagar</th>
+              <th>Abonado</th>
+              <th>Pendiente</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="credits-list">
+            <!-- Registros dinámicos -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para Detalle y Registro de Pagos -->
+  <div class="modal-overlay" id="payment-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="modal-title">Detalles del Crédito</h3>
+        <button class="close-btn" onclick="closeModal()">&times;</button>
+      </div>
+
+      <div id="modal-summary" class="modal-summary-box">
+        <!-- Resumen dinámico -->
+      </div>
+
+      <h4>Registrar Nuevo Pago</h4>
+      <form id="payment-form">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="pay-date">Fecha</label>
+            <input type="date" id="pay-date" required>
+          </div>
+          <div class="form-group">
+            <label for="pay-amount">Monto ($)</label>
+            <input type="number" id="pay-amount" step="0.01" required>
+          </div>
+        </div>
+        <div class="form-group" style="margin-top: 12px;">
+          <label for="pay-note">Nota / Referencia (Opcional)</label>
+          <input type="text" id="pay-note" placeholder="Ej. Transferencia BBVA">
+        </div>
+        <button type="submit" class="btn" style="margin-top: 16px;">Añadir Pago</button>
+      </form>
+
+      <h4 style="margin-top: 24px;">Historial de Pagos</h4>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Monto</th>
+              <th>Nota / Referencia</th>
+            </tr>
+          </thead>
+          <tbody id="payments-history">
+            <!-- Historial dinámico -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
