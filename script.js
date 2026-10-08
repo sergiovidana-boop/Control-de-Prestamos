@@ -1,5 +1,6 @@
 let credits = JSON.parse(localStorage.getItem('credits_data')) || [];
 let currentCreditIndex = null;
+let currentEditingPaymentIndex = null; // Para saber si estamos editando un pago existente
 
 const creditForm = document.getElementById('credit-form');
 const creditsList = document.getElementById('credits-list');
@@ -77,22 +78,38 @@ creditForm.addEventListener('submit', (e) => {
 
 window.openModal = function(index) {
   currentCreditIndex = index;
-  const credit = credits[index];
-  const totals = calculateCreditTotals(credit);
+  currentEditingPaymentIndex = null; // Reiniciar modo de edición
+  resetPaymentForm();
 
+  const credit = credits[index];
   document.getElementById('modal-title').textContent = `Crédito: ${credit.concept}`;
-  document.getElementById('pay-date').valueAsDate = new Date();
-  document.getElementById('pay-amount').value = credit.monthly_payment;
+
+  updateModalSummary();
+  renderPaymentHistory();
+  modalOverlay.style.display = 'flex';
+};
+
+function updateModalSummary() {
+  const credit = credits[currentCreditIndex];
+  const totals = calculateCreditTotals(credit);
 
   document.getElementById('modal-summary').innerHTML = `
     <p style="margin:4px 0;"><strong>Total del Crédito:</strong> $${totals.totalToPay.toFixed(2)}</p>
     <p style="margin:4px 0; color: var(--success);"><strong>Total Abonado:</strong> $${totals.totalPaid.toFixed(2)}</p>
     <p style="margin:4px 0; color: var(--danger);"><strong>Saldo Pendiente:</strong> $${totals.remaining.toFixed(2)}</p>
   `;
+}
 
-  renderPaymentHistory();
-  modalOverlay.style.display = 'flex';
-};
+function resetPaymentForm() {
+  currentEditingPaymentIndex = null;
+  const credit = credits[currentCreditIndex];
+  document.getElementById('pay-date').valueAsDate = new Date();
+  document.getElementById('pay-amount').value = credit ? credit.monthly_payment : '';
+  document.getElementById('pay-note').value = '';
+  
+  const submitBtn = paymentForm.querySelector('button[type="submit"]');
+  if (submitBtn) submitBtn.textContent = 'Añadir Pago';
+}
 
 function renderPaymentHistory() {
   const historyList = document.getElementById('payments-history');
@@ -101,42 +118,83 @@ function renderPaymentHistory() {
   const history = credits[currentCreditIndex].payment_history || [];
 
   if (history.length === 0) {
-    historyList.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#64748b;">No hay pagos registrados.</td></tr>`;
+    historyList.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#64748b;">No hay pagos registrados.</td></tr>`;
     return;
   }
 
-  history.forEach((item) => {
+  history.forEach((item, pIndex) => {
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${item.date}</td>
       <td><strong>$${item.amount.toFixed(2)}</strong></td>
       <td>${item.note || '-'}</td>
+      <td>
+        <div class="actions-cell">
+          <button class="btn btn-small btn-secondary" onclick="editPayment(${pIndex})">✏️ Editar</button>
+          <button class="btn btn-small btn-danger" onclick="deletePayment(${pIndex})">🗑️</button>
+        </div>
+      </td>
     `;
     historyList.appendChild(tr);
   });
 }
 
+// Guardar o actualizar un pago
 paymentForm.addEventListener('submit', (e) => {
   e.preventDefault();
 
   if (currentCreditIndex === null) return;
 
-  const newPayment = {
+  const paymentData = {
     date: document.getElementById('pay-date').value,
     amount: parseFloat(document.getElementById('pay-amount').value),
     note: document.getElementById('pay-note').value
   };
 
-  credits[currentCreditIndex].payment_history.push(newPayment);
+  if (currentEditingPaymentIndex !== null) {
+    // Editar pago existente
+    credits[currentCreditIndex].payment_history[currentEditingPaymentIndex] = paymentData;
+  } else {
+    // Añadir nuevo pago
+    credits[currentCreditIndex].payment_history.push(paymentData);
+  }
+
   saveToStorage();
   renderCredits();
-  openModal(currentCreditIndex);
-  document.getElementById('pay-note').value = '';
+  updateModalSummary();
+  renderPaymentHistory();
+  resetPaymentForm();
 });
+
+// Cargar datos de un pago en el formulario para editarlo
+window.editPayment = function(pIndex) {
+  currentEditingPaymentIndex = pIndex;
+  const payment = credits[currentCreditIndex].payment_history[pIndex];
+
+  document.getElementById('pay-date').value = payment.date;
+  document.getElementById('pay-amount').value = payment.amount;
+  document.getElementById('pay-note').value = payment.note || '';
+
+  const submitBtn = paymentForm.querySelector('button[type="submit"]');
+  if (submitBtn) submitBtn.textContent = 'Actualizar Pago';
+};
+
+// Eliminar un pago individual
+window.deletePayment = function(pIndex) {
+  if (confirm('¿Deseas eliminar este pago?')) {
+    credits[currentCreditIndex].payment_history.splice(pIndex, 1);
+    saveToStorage();
+    renderCredits();
+    updateModalSummary();
+    renderPaymentHistory();
+    resetPaymentForm();
+  }
+};
 
 window.closeModal = function() {
   modalOverlay.style.display = 'none';
   currentCreditIndex = null;
+  currentEditingPaymentIndex = null;
 };
 
 window.deleteCredit = function(index) {
