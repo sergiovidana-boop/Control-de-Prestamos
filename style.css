@@ -27,6 +27,19 @@ h1, h2, h3, h4 {
   color: #0f172a;
 }
 
+.header-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.header-icon {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+}
+
 .card {
   background: var(--card-bg);
   border-radius: 12px;
@@ -199,16 +212,4 @@ th {
 @media (max-width: 600px) {
   body { padding: 12px; }
   .card { padding: 16px; }
-}
-.header-title {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-}
-
-.header-icon {
-  width: 36px;
-  height: 36px;
-  object-fit: contain;
 }
